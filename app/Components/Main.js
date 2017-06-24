@@ -1,128 +1,48 @@
-var axios = require('axios');
-
-// Include React 
 var React = require('react');
+var Router = require('react-router')
 
-// Here we include all of the sub-components
-var Form = require('./Children/Form');
-var Results = require('./Children/Results');
-var Saved = require('./Children/Saved');
-
-// Helper Function
-var helpers = require('./utils/helpers.js');
-
-
-// This is the main component. 
 var Main = React.createClass({
 
-	// Here we set a generic state associated with the number of clicks
-	getInitialState: function(){
-		return {
-			topic: "",
-			startYear: "",
-			endYear: "",
-			results: [],
-			savedArticles: []
-		}
-	},	
+  render: function(){
 
-	// We use this function to allow children to update the parent with searchTerms.
-	setTerm: function(tpc, stYr, endYr){
-		this.setState({
-			topic: tpc,
-			startYear: stYr,
-			endYear: endYr
-		})
-	},
+    return(
 
-	saveArticle: function(title, date, url){
-		helpers.postArticle(title, date, url);
-		this.getArticle();
-	},
+      <div className="main-container">
 
-	deleteArticle: function(article){
-		console.log(article);
-		axios.delete('/api/saved/' + article._id)
-			.then(function(response){
-				this.setState({
-					savedArticles: response.data
-				});
-				return response;
-			}.bind(this));
 
-		this.getArticle();
-	},
+        <div className="container">
 
-	getArticle: function(){
-		axios.get('/api/saved')
-			.then(function(response){
-				this.setState({
-					savedArticles: response.data
-				});
-			}.bind(this));
-	},
+          <nav className="navbar navbar-default" role="navigation">
+            <div className="container-fluid">
+              <div className="navbar-header">
+                <button type="button" className="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                  <span className="sr-only">Toggle navigation</span>
+                  <span className="icon-bar"></span>
+                  <span className="icon-bar"></span>
+                  <span className="icon-bar"></span>
+                </button>
+                <a className="navbar-brand" href="#">NYT-React</a>
+              </div>
 
-	// If the component updates we'll run this code
-	componentDidUpdate: function(prevProps, prevState){
+              <div className="collapse navbar-collapse navbar-ex1-collapse">
+                <ul className="nav navbar-nav navbar-right">
+                  <li><a href="#/search">Search</a></li>
+                  <li><a href="#/saved">Saved Articles</a></li>
+                </ul>
+              </div>
+            </div>
+          </nav>
 
-		if(prevState.topic != this.state.topic){
-			console.log("UPDATED");
+          <div className="jumbotron">
+            <h2 className="text-center"><strong>New York Times Article Scrubber</strong></h2>
+          </div>
 
-			helpers.runQuery(this.state.topic, this.state.startYear, this.state.endYear)
-				.then(function(data){
-					console.log(data);
-					if (data != this.state.results)
-					{
-						this.setState({
-							results: data
-						})
-					}
-				}.bind(this))
-		}
-	},
+          {this.props.children}
 
-	componentDidMount: function(){
-		axios.get('/api/saved')
-			.then(function(response){
-				this.setState({
-					savedArticles: response.data
-				});
-			}.bind(this));
-	},
-
-	// Here we render the function
-	render: function(){
-		return(
-
-			<div className="container">
-
-				<div className="row">
-
-					<div className="jumbotron" style={{'backgroundImage': 'url(./assets/images/newspaper.jpg)', 'backgroundRepeat': 'no-repeat', 'backgroundPosition': 'center', 'backgroundSize': '100% 100%', 'backgroundAttachment': 'fixed'}}>
-						<h2 className="text-center" style={{'color': 'white', 'textShadow': '3px 3px 10px black', 'fontSize': '54px'}}>New York Times Article Search and Save</h2>
-						<p className="text-center" style={{'color': 'white', 'textShadow': '3px 3px 10px black', 'fontSize': '24px'}}>Search for and save articles of interest!</p>
-					</div>
-				</div>
-				<div className="row">
-
-					<Form setTerm={this.setTerm}/>
-
-				</div>
-
-				<div className="row">
-			
-					<Results results={this.state.results} saveArticle={this.saveArticle}/>
-
-				</div>
-
-				<div className="row">
-				
-					<Saved savedArticles={this.state.savedArticles} deleteArticle={this.deleteArticle} />
-
-				</div>
-			</div>
-		)
-	}
+        </div>
+      </div>
+    )
+  }
 });
 
 module.exports = Main;
